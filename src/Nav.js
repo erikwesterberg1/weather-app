@@ -17,8 +17,8 @@ class Navbar extends React.Component {
         return(
             <div className="navBar" style={navStyle}>
                 <ul style={linkStyle}>
-                    <li><a href="/">hello</a></li>
-                    <li><a href='/'>world</a></li>
+                    <li><a href="/" style={{textTransform: 'uppercase'}}>current</a></li>
+                    <li><a href='/' style={{textTransform: 'uppercase'}}>weather</a></li>
                 </ul>
             </div>
         )
