@@ -1,15 +1,43 @@
-import React from 'react';
-import './App.css';
-import Cloud from './img/cloud.png';
-import Sun from './img/sun.png';
-import Snow from './img/snowy.png';
-import Rain from './img/raining.png';
-import Drizzle from './img/drizzle.png';
-import Mist from './img/mist.png';
-import Fog from './img/fog.png'
-import WeatherCol from './weatherCol';
-import moment from 'moment'
+import React from 'react'
+import './App.css'
+import WeatherCol from './weatherCol'
+import {fetchWeather, fetchWeekly} from './apiFetches'
+import {changeImage, changeBackground} from './common'
 
+
+
+/*const officers = [
+  { id: 20, name: 'Captain Piett' },
+  { id: 24, name: 'General Veers' },
+  { id: 56, name: 'Admiral Ozzel' },
+  { id: 88, name: 'Commander Jerjerrod' }
+]
+
+const officersName = officers.map(officer => officer.name)
+console.log(officersName)
+
+
+const characters = [
+  {level: 100, name: 'cpt Price', title: 'captain'},
+  {level: 10, name: 'lt Dan', title: 'liutanant'},
+  {level: 120, name: 'mc john-117 ', title: 'master chief officer'},
+  {level: 30, name: 'adm ackbar', title: 'admiral'},
+  {level: 70, name: 'pvt Ryan', title: 'private'}
+]
+
+const characterLevel = characters.filter(char => char.level >= 60)
+console.log(characterLevel)
+
+
+const money = [
+  {product: 'socks', price: 30},
+  {product: 't-shirt', price: 67},
+  {product: 'shirt', price: 350},
+  {product: 'jeans', price: 498}
+]
+
+const total = money.reduce((acc,mon) => acc + mon.price,0)
+console.log(total)*/
 
 
 
@@ -25,21 +53,20 @@ var options = {
   enableHighAccuracy: true,
   timeout: 5000,
   maximumAge: 0
-};
+}
 
 
   
 
 class Weather extends React.Component {
   constructor(){
-  super();
+  super()
   this.state = {
     weather: {},
     isloading: true,
     location: 'åre',
     lat: '',
     long: '',
-    inputValue: '',
     weekly: {}
   }
 
@@ -48,31 +75,32 @@ class Weather extends React.Component {
     let {location} = this.state
     const firstUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=224019f95493a66e58ed72c09393c01a`
     const secondUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${location}&limit=5&appid=5aa1660165374b4199e3f8f06d3f3479`
-    this.fetchWeather(firstUrl)
-    this.fetchWeekly(secondUrl)
-    
+    fetchWeekly(secondUrl)
+    .then((res) => this.setState({weekly: res}))
+    fetchWeather(firstUrl)
+      .then((res) => this.setState({weather: res}))
     }
-
+    
     
       
       render(){
         this.renderWeatherCols()
         var {name,temp,wind,currentWeather,description,windspeed,pressure,humidity,gust,snow} = this.state.weather
-        var {city,/*d1temp,d1main,d1desc,d1date,d2temp,d2main,d2desc,d2date,d3temp,d3main,d3desc,d3date,d4temp,d4main,d4desc,d4date,d5temp,d5main,d5desc,d5date*/} = this.state.weekly
       return(
       
-      <div className="boxStyle" style={{backgroundColor: this.changeBackground()}}>
+      <div className="boxStyle" style={{backgroundColor: changeBackground(currentWeather)}}>
         <div className="bgIcon"></div>
           <label className="la">Get-your-location</label><div className="geoIcon" onClick={this.getLocation}></div>
             <div className="search">
-              <form onSubmit={this.onSubmit}>
-                <input type="text" value={this.state.inputValue} onChange={this.onChange} placeholder={this.state.location} maxLength="20" style={{backgroundColor: this.changeBackground()}}/>
-                <button type="submit" value="submit">search</button>
-              </form>
+              {/* <form onSubmit={this.onSubmit}> */}
+                <input type="text" onChange={this.onChange} value={this.state.inputValue} placeholder={this.state.location} maxLength="20" style={{backgroundColor: changeBackground(currentWeather)}}/>
+                <button type="submit" onClick={this.onSubmit}>search</button>
+              {/* </form> */}
             </div>
-          <div className="icon" style={{backgroundImage: this.changeImage()}}></div>
-          <h1>{name}</h1>
+          <div className="icon" style={{backgroundImage: changeImage(currentWeather)}}></div>
+          <h1 className="title">{name}</h1>
           <i>Daily weather overview</i>
+          <div className="dailyBlock">
             <div className="divStyle" name="row1">
               <label>Temperature:</label><h3>{temp}</h3>
               <label>Main-weather:</label><h3>{currentWeather}</h3>
@@ -88,11 +116,12 @@ class Weather extends React.Component {
               <label>Pressure:</label><h3>{pressure}</h3>
               <label>Humidity:</label><h3>{humidity}</h3>
             </div>
-            
+            </div>
 
             {/* kompimerat resultat med hjälp av map() och en ny komponent*/}
             <i>Upcomming 5 days</i>
-            <h1>{city}</h1>
+            <p>&darr;</p>
+            <h1>{name}</h1>
             <div className="col">
                 {this.renderWeatherCols()}
             </div>    
@@ -134,158 +163,21 @@ class Weather extends React.Component {
       </div>
     )
   }
-  
-  fetchWeather = (url) => {
-    fetch(url)
-      .then(response => {
-      return response.json();
-      }).then(data => {
 
-      var obj = {
-        name: data.name,
-        temp: kelvinToCelcius(data.main.temp),
-        wind: data.wind.deg,
-        currentWeather: data.weather[0].main,
-        description: data.weather[0].description,
-        windspeed: data.wind.speed,
-        pressure: data.main.pressure,
-        humidity: data.main.humidity,
-        gust: data.wind.gust ? data.wind.gust : 0,
-        snow: data.snow ? data.snow['3h'] : 0
-      }
+  onChange = (event) => this.setState({location: event.target.value})
 
-        this.setState({
-          weather: obj, 
-          isloading: false
-        })
-        console.log()
-      })
-      .catch(error => console.log(error))
-  }
-
-  
-  fetchWeekly = (url) => {
-    fetch(url)
-      .then(response => {
-      return response.json();
-      }).then(data => {  
-      let daysList = data.list.filter(item => moment(item.dt_txt).diff(moment(), 'days') !== 0)
-        .map(item => {
-          let newObj = {
-            temp: kelvinToCelcius(item.main.temp),
-            description: item.weather[0].description,
-            main: item.weather[0].main,
-            date: item.dt_txt
-          }
-          return newObj
-        })
-      
-      
-
-        var weeklyObj = {
-        city: data.city.name,
-        days: daysList,
-        forcastDays: [
-          {
-            temp: daysList[0].temp,
-            main: daysList[0].main,
-            desc: daysList[0].description,
-            date: daysList[0].date
-          },
-          {
-            temp: daysList[8].temp,
-            main: daysList[8].main,
-            desc: daysList[8].description,
-            date: daysList[8].date
-          },
-          { 
-            temp: daysList[16].temp,
-            main: daysList[16].main,
-            desc: daysList[16].description,
-            date: daysList[16].date
-          },
-          { 
-            temp: daysList[24].temp,
-            main: daysList[24].main,
-            desc: daysList[24].description,
-            date: daysList[24].date
-          },
-          { 
-            temp: daysList[30].temp,
-            main: daysList[30].main,
-            desc: daysList[30].description,
-            date: daysList[30].date
-          }
-        ]
-      }
-      
-      this.setState({
-        weekly: weeklyObj, 
-        isloading: false
-      })
-      console.log(this.state.weekly.forcastDays[2])
-      })
-      .catch(error => console.log(error))
-  }
-  
-  filterToday = (array) => {
-    array.filter(item => {
-      return moment(item.dt_txt).diff(moment(), 'days') !== 0
-    })
-  }
-
-  changeBackground =  () => {
-    let {weather} = this.state
-    let {currentWeather} = weather
-    if (!currentWeather) return 'blue'
-    
-    switch (currentWeather) {
-      case 'Clouds': return 'lightgrey'
-      case 'Clear': return 'lightblue'
-      case 'Snow': return 'seashell'
-      case 'Rain': return 'grey'
-      case 'Drizzle': return 'seashell'
-      case 'Mist': return 'thistle'
-      case 'Fog': return 'chocolate'
-      default: return 'yellow'
-    }
-    
-}
-
-changeImage =  () => {
-  let {weather} = this.state
-  let {currentWeather} = weather
-  if (!currentWeather) return 'url(./img/cloud.png)'
-  
-  switch (currentWeather) {
-    case 'Clouds': return `url(${Cloud})`
-    case 'Clear': return  `url(${Sun})`
-    case 'Snow': return `url(${Snow})`
-    case 'Rain': return `url(${Rain})`
-    case 'Drizzle': return `url(${Drizzle})`
-    case 'Mist': return `url(${Mist})`
-    case 'Fog': return `url(${Fog})`
-    default: return 'yellow'
-  }
-  
-}
-  onChange = (event) => {
-    this.setState({inputValue: event.target.value});
-}
-
-  onSubmit = (event) => {
-    //if (this.state.inputValue !== this.state.location){
-    this.setState({location: this.state.inputValue})
+  onSubmit = () => {
     let {location} = this.state
-    this.fetchWeather(`https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=224019f95493a66e58ed72c09393c01a`)
-    this.fetchWeekly(`https://api.openweathermap.org/data/2.5/forecast?q=${location}&limit=5&appid=5aa1660165374b4199e3f8f06d3f3479`)
-    event.preventDefault();
+    console.log('location', location)
+    fetchWeather(`https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=224019f95493a66e58ed72c09393c01a`)
+    .then((res) => this.setState({weather: res}))
+    fetchWeekly(`https://api.openweathermap.org/data/2.5/forecast?q=${location}&limit=5&appid=5aa1660165374b4199e3f8f06d3f3479`)
+    .then ((res) => this.setState({weekly: res}))
   } 
 
   
-  
   success = (pos) => {
-    var crd = pos.coords;
+    var crd = pos.coords
     this.setState({
       lat: `${crd.latitude}`,
       long: `${crd.longitude}`
@@ -300,12 +192,12 @@ changeImage =  () => {
   }
   
    error = (err) => {
-    console.warn(`ERROR(${err.code}): ${err.message}`);
+    console.warn(`ERROR(${err.code}): ${err.message}`)
   }
   
   getLocation = () => {
     if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(this.success, this.error, options);
+      navigator.geolocation.getCurrentPosition(this.success, this.error, options)
     } else{
       console.log('error')
     }
@@ -322,6 +214,8 @@ changeImage =  () => {
       })
   }
 //--------------------------------------------------------------------------
+
+
 }
 
 
@@ -329,6 +223,4 @@ changeImage =  () => {
 
 
 
-
-
-export default Weather;
+export default Weather

@@ -1,0 +1,1 @@
+let kelvinToCelcius = jest.fn()

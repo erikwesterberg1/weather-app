@@ -3,9 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "babel-eslint": "^10.0.3",
+    "eslint-plugin-react": "^7.16.0",
+    "jest": "^24.9.0",
     "moment": "^2.24.0",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
+    "react-instafeed": "^1.0.0",
+    "react-router-dom": "^5.1.2",
     "react-scripts": "3.2.0"
   },
   "scripts": {
@@ -28,5 +33,12 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.2",
+    "@babel/preset-env": "^7.7.1",
+    "babel-jest": "^24.9.0",
+    "eslint": "^6.6.0",
+    "jest-cli": "^24.9.0"
   }
 }

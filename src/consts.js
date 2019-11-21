@@ -1,0 +1,7 @@
+export const RAIN = 'Rain'
+export const CLOUDY = 'Cloudy'
+export const CLEAR = 'Clear'
+export const FOG = 'Fog'
+export const MIST = 'Mist'
+export const SNOW = 'Snow'
+export const DRIZZLE = 'Drizzle'
